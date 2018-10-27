@@ -73,7 +73,7 @@ def loadDataSetAnalysis(dataSetDir, k):
                 filename = dataSetDir+'/s'+str(people_num)+'/'+str(k)+'.pgm'
                 img = img2vector(filename)     
                 train_face[i*k+j,:] = img
-                train_face_number[i*k+j] = people_numc
+                train_face_number[i*k+j] = people_num
             else:
                 filename = dataSetDir+'/s'+str(people_num)+'/'+str(k)+'.pgm'
                 img = img2vector(filename)     
