@@ -3,3 +3,4 @@ __pycache__/
 training.txt
 training1.txt
 data_conversion.py
+upload/
