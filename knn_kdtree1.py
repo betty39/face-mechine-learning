@@ -27,6 +27,9 @@ def createDataSet():
     labels = np.array(labels)
     return group, labels
 
+
+    
+
 # tree node
 class Node:
     """docstring for ClassName"""

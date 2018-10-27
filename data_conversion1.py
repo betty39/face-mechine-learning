@@ -59,9 +59,10 @@ def loadDataSet(dataSetDir):
     return train_face,train_face_labels
 
 '''
-: param dataSetDir: 文件夹 k: 取的测试集个数
+: param dataSetDir: 文件夹路径(att_faces 的数据) k: 取的训练集个数
 '''
 def loadDataSetAnalysis(dataSetDir, k):
+    choose = random.permutation(10)+1 #随机排序1-10 (0-9）+1
     train_face = zeros((40*k,112*92))
     train_face_number = zeros(40*k)
     test_face = zeros((40*(10-k),112*92))
@@ -70,13 +71,48 @@ def loadDataSetAnalysis(dataSetDir, k):
         people_num = i+1
         for j in range(10): #everyone has 10 different face
             if j < k:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(k)+'.pgm'
+                filename = dataSetDir+'/s'+str(people_num)+'/'+str(j+1)+'.pgm'
                 img = img2vector(filename)     
                 train_face[i*k+j,:] = img
                 train_face_number[i*k+j] = people_num
             else:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(k)+'.pgm'
+                filename = dataSetDir+'/s'+str(people_num)+'/'+str(j+1)+'.pgm'
                 img = img2vector(filename)     
                 test_face[i*(10-k)+(j-k),:] = img
                 test_face_number[i*(10-k)+(j-k)] = people_num
     return train_face,train_face_number,test_face,test_face_number
+
+'''
+: param dataSetDir: 文件夹路径(jaffe 的数据) k: 作为训练集个数
+'''
+def loadDataJaffeAnalysis(dataSetDir, k):
+    fileNum = 0
+    for lists in os.listdir(dataSetDir):
+        sub_path = os.path.join(dataSetDir, lists)
+        if os.path.isfile(sub_path):
+            fileNum = fileNum+1                  # 统计图片数量
+    train_face = zeros((10*k, 256*256))
+    train_face_labels = []
+    test_face = zeros((fileNum - 10*k,256*256))
+    test_face_labels = []
+    for parent,dirnames,filenames in os.walk(dataSetDir):
+        per = 0
+        index = 0
+        lastLabel = ''
+        test_num = 0
+        for filename in filenames:
+            img = img2vector(parent+'/'+filename)
+            person = filename.split('.')
+            if index == 0 or person[0] != lastLabel:
+                per = 0
+                index += 1
+            if per < k :
+                train_face[(index - 1) *k + per, :] = img
+                train_face_labels.append(person[0])
+            else :
+                test_face[test_num, :] = img
+                test_face_labels.append(person[0])
+                test_num += 1
+            lastLabel = person[0]
+            per += 1
+    return train_face,train_face_labels,test_face,test_face_labels
