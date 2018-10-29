@@ -10,7 +10,7 @@ import cv2
 : data: 原始矩阵 k: 降低维度值
 '''
 def pca(data,k):
-    data = float32(mat(data)) 
+    data = float32(mat(data))
     rows,cols = data.shape#取大小
     data_mean = mean(data,0)#对列求均值
     data_mean_all = tile(data_mean,(rows,1))
@@ -27,11 +27,13 @@ def pca(data,k):
     return data_new,data_mean,V1
 
 #covert image to vector
-def img2vector(filename):
+def img2vector(filename, dimsize = (50, 50)):
     img = cv2.imread(filename,0) #read as 'gray'
-    rows,cols = img.shape
+    retImg = cv2.resize(img, dimsize) # 缩放成一定尺寸
+    rows,cols = retImg.shape
+    retImg = cv2.equalizeHist(retImg) # 直方图均衡化
     imgVector = zeros((1,rows*cols)) #create a none vectore:to raise speed
-    imgVector = reshape(img,(1,rows*cols)) #change img from 2D to 1D      
+    imgVector = reshape(retImg,(1,rows*cols)) #change img from 2D to 1D
     return imgVector
 
 #load dataSet
@@ -39,20 +41,21 @@ def img2vector(filename):
 :param dataSetDir:读取文件夹下原始图片矩阵及标签(只解析子文件图片)
 :return train_face: 样本图片原始矩阵 train_face_lables: 样本图片标签
 '''
-def loadDataSet(dataSetDir):
+def loadDataSet(dataSetDir, height = 256, weight = 256):
     ##step 1:Getting data set
+    dimsize = height * weight
     fileNum = 0
     for lists in os.listdir(dataSetDir):
         sub_path = os.path.join(dataSetDir, lists)
         if os.path.isfile(sub_path):
             fileNum = fileNum+1                     # 统计图片数量
 
-    train_face = zeros((fileNum,256*256))
+    train_face = zeros((fileNum, dimsize))
     train_face_labels = []
     for parent,dirnames,filenames in os.walk(dataSetDir):
          index = 0
          for filename in filenames:
-            img = img2vector(parent+'/'+filename)
+            img = img2vector(parent+'/'+filename, (height, weight))
             train_face[index,:] = img
             train_face_labels.append(parent+'/'+filename)
             index += 1
@@ -60,40 +63,47 @@ def loadDataSet(dataSetDir):
 
 '''
 : param dataSetDir: 文件夹路径(att_faces 的数据) k: 取的训练集个数
+: 作为 Holdout Method(保留)的交叉验证方式去分析
 '''
 def loadDataSetAnalysis(dataSetDir, k):
+    height = 112
+    weight = 92
+    dimsize = height * weight # 原图为112 * 92
+
     choose = random.permutation(10)+1 #随机排序1-10 (0-9）+1
-    train_face = zeros((40*k,112*92))
+    train_face = zeros((40*k, dimsize))
     train_face_number = zeros(40*k)
-    test_face = zeros((40*(10-k),112*92))
+    test_face = zeros((40*(10-k),dimsize))
     test_face_number = zeros(40*(10-k))
     for i in range(40): #40 sample people
         people_num = i+1
         for j in range(10): #everyone has 10 different face
             if j < k:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(j+1)+'.pgm'
-                img = img2vector(filename)     
+                filename = dataSetDir+'/s'+str(people_num)+'/'+str(choose[j])+'.pgm'
+                img = img2vector(filename, (height, weight))
                 train_face[i*k+j,:] = img
                 train_face_number[i*k+j] = people_num
             else:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(j+1)+'.pgm'
-                img = img2vector(filename)     
+                filename = dataSetDir+'/s'+str(people_num)+'/'+str(choose[j])+'.pgm'
+                img = img2vector(filename, (height, weight))
                 test_face[i*(10-k)+(j-k),:] = img
                 test_face_number[i*(10-k)+(j-k)] = people_num
     return train_face,train_face_number,test_face,test_face_number
 
 '''
 : param dataSetDir: 文件夹路径(jaffe 的数据) k: 作为训练集个数
+: 作为 Holdout Method(保留)的交叉验证方式去分析
 '''
-def loadDataJaffeAnalysis(dataSetDir, k):
+def loadDataJaffeAnalysis(dataSetDir, k, height = 256, weight = 256):
+    dimsize = height * weight # 原图为256 * 256
     fileNum = 0
     for lists in os.listdir(dataSetDir):
         sub_path = os.path.join(dataSetDir, lists)
         if os.path.isfile(sub_path):
             fileNum = fileNum+1                  # 统计图片数量
-    train_face = zeros((10*k, 256*256))
+    train_face = zeros((10*k, dimsize))
     train_face_labels = []
-    test_face = zeros((fileNum - 10*k,256*256))
+    test_face = zeros((fileNum - 10*k, dimsize))
     test_face_labels = []
     for parent,dirnames,filenames in os.walk(dataSetDir):
         per = 0
@@ -101,7 +111,7 @@ def loadDataJaffeAnalysis(dataSetDir, k):
         lastLabel = ''
         test_num = 0
         for filename in filenames:
-            img = img2vector(parent+'/'+filename)
+            img = img2vector(parent+'/'+filename, (height, weight))
             person = filename.split('.')
             if index == 0 or person[0] != lastLabel:
                 per = 0

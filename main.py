@@ -6,6 +6,7 @@ from numpy import *
 import uuid
 import platform
 from flask import Flask, abort, request, jsonify
+import face_recognition
 
 if platform.system() == "Windows":
     slash = '\\'
@@ -56,6 +57,11 @@ def knn_findFace():
 		print(file_path)
 	if file_path == '':
 		return buildResponse({}, 400, 'no file upload')
+
+	# 对上传图片进行人脸检测
+	ifHasFace = face_recognition.detectFaces(file_path)
+	if len(ifHasFace) <= 0:
+		return buildResponse({}, 400, 'no face in upload file')
 
 	path = '/Users/heyijia/master/机器学习/人脸识别/jaffe'
 	# 获取样本图片原始数据
