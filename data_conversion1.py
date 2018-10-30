@@ -10,16 +10,16 @@ import cv2
 : data: 原始矩阵 k: 降低维度值
 '''
 def pca(data,k):
-    data = float32(mat(data))
-    rows,cols = data.shape#取大小
-    data_mean = mean(data,0)#对列求均值
+    data = float32(mat(data)) 
+    rows,cols = data.shape  # 取大小
+    data_mean = mean(data,0) # 对列求均值
     data_mean_all = tile(data_mean,(rows,1))
     Z = data - data_mean_all
-    T1 = Z*Z.T #使用矩阵计算，所以前面mat
-    D,V = linalg.eig(T1) #特征值与特征向量
-    V1 = V[:,0:k]#取前k个特征向量
+    T1 = Z*Z.T  # 使用矩阵计算，所以前面mat
+    D,V = linalg.eig(T1)  # 特征值与特征向量
+    V1 = V[:,0:k]  # 取前k个特征向量
     V1 = Z.T*V1
-    for i in range(k): #特征向量归一化
+    for i in range(k):  # 特征向量归一化
         L = linalg.norm(V1[:,i])
         V1[:,i] = V1[:,i]/L
 
@@ -36,7 +36,7 @@ def img2vector(filename, dimsize = (50, 50)):
     imgVector = reshape(retImg,(1,rows*cols)) #change img from 2D to 1D
     return imgVector
 
-#load dataSet
+# load dataSet
 '''
 :param dataSetDir:读取文件夹下原始图片矩阵及标签(只解析子文件图片)
 :return train_face: 样本图片原始矩阵 train_face_lables: 样本图片标签
