@@ -13,10 +13,16 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt
+import platform
 
+if platform.system() == "Windows":
+    slash = '\\'
+else:
+    platform.system()=="Linux"
+    slash = '/'
 
-
-PICTURE_PATH = u"E:\\研一上\\机器学习\\作业\\Face recognition\\face-mechine-learning\\att_faces"
+# PICTURE_PATH = u"E:\\研一上\\机器学习\\作业\\Face recognition\\face-mechine-learning\\att_faces"
+PICTURE_PATH = "/Users/heyijia/master/机器学习/人脸识别/att_faces"
 
 all_data_set = []  # 原始总数据集，二维矩阵n*m，n个样例，m个属性
 all_data_label = []  # 总数据对应的类标签
@@ -26,7 +32,7 @@ def get_picture():
     label = 1
     # 读取所有图片并一维化
     while (label <= 20):
-        for name in glob.glob(PICTURE_PATH + "\\s" + str(label) + "\\*.pgm"):
+        for name in glob.glob(PICTURE_PATH + slash + "s" + str(label) + slash + "*.pgm"):
             img = Image.open(name)
             # img.getdata()
             # np.array(img).reshape(1, 92*112)
@@ -36,7 +42,6 @@ def get_picture():
 
 
 get_picture()
-
 n_components = 16  # 这个降维后的特征值个数如果太大，比如100，结果将极其不准确，为何？？
 pca = PCA(n_components=n_components, svd_solver='auto',
           whiten=True).fit(all_data_set)
@@ -90,4 +95,3 @@ plt.ylabel("Precision")
 plt.title('Different Kernels Contrust')
 plt.legend()
 plt.show()
-
