@@ -6,30 +6,6 @@ import numpy as np
 import copy
 import operator
 
-# 读取一个数据集
-def createDataSet():
-    group = [] # 生成一个矩阵，每行表示一个样本
-    labels = [] # 样本分别所属的类别
-    #path = "/Users/heyijia/master/机器学习/人脸识别/19_Multi-Task Facial Landmark (MTFL) dataset/Multi-Task Facial Landmark (MTFL) dataset/training.txt"
-    path = 'training.txt'
-    # 读取文本
-    for line in open(path,"r"): #设置文件对象并读取每一行文件
-        data = line.split()
-        length = len(data)
-        item = []
-        for i in range(length):
-            if i != 0:
-                item.append(float(data[i]))
-            else:
-                labels.append(data[i])
-        group.append(copy.copy(item))
-    group = np.array(group)   # 将list 转成array
-    labels = np.array(labels)
-    return group, labels
-
-
-    
-
 # tree node
 class Node:
     """docstring for ClassName"""

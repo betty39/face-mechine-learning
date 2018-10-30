@@ -22,7 +22,7 @@ def pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, low
             true_num += 1
     accuracy = float(true_num)/num_test
     return accuracy
-'''
+
 path = constant.ATT_FACE['path']
 # 获取样本图片原始数据
 print('analysis att_faces')
@@ -55,7 +55,7 @@ while (dim < 100):
 	dim += 10
 pl.plot(x, y)  # 调用pylab的plot函数绘制曲线
 pl.show()  # 显示绘制出的图
-'''
+
 path = constant.JAFFE['last_path']
 # 获取样本图片原始数据
 print('analysis jaffe face')
