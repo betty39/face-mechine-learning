@@ -22,7 +22,7 @@ def pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, low
     accuracy = float(true_num)/num_test
     return accuracy
 
-path = '/Users/heyijia/master/机器学习/人脸识别/att_faces'
+path = 'E:/研一上/机器学习/作业/Face recognition/face-mechine-learning/att_faces'
 # 获取样本图片原始数据
 print('analysis att_faces')
 train_data, train_labels, test_data, test_labels = data_conversion1.loadDataSetAnalysis(path, 8)
@@ -37,7 +37,7 @@ while (dim < 100):
 pl.plot(x, y)  # 调用pylab的plot函数绘制曲线
 pl.show()  # 显示绘制出的图
 
-path = '/Users/heyijia/master/机器学习/人脸识别/jaffe'
+path = 'E:/研一上/机器学习/作业/Face recognition/face-mechine-learning/jaffe'
 # 获取样本图片原始数据
 print('analysis jaffe')
 train_data, train_labels, test_data, test_labels = data_conversion1.loadDataJaffeAnalysis(path, 13)
