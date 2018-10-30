@@ -6,6 +6,7 @@ import constant
 from numpy import *
 import cv2
 
+
 # define PCA
 '''
 : data: 原始矩阵 k: 降低维度值
@@ -28,7 +29,9 @@ def pca(data,k):
     return data_new,data_mean,V1
 
 #covert image to vector
+#covert image to vector
 def img2vector(filename, dimsize = (50, 50)):
+    #file_path_gbk = filename.encode('gbk')
     img = cv2.imread(filename, 0)
     retImg = cv2.resize(img, dimsize) # 缩放成一定尺寸
     rows,cols = retImg.shape
@@ -82,12 +85,12 @@ def loadDataSetAnalysis(dataSetDir, k):
         people_num = i+1
         for j in range(10): #everyone has 10 different face
             if j < k:
-                filename = dataSetDir+'/s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
+                filename = dataSetDir+ constant.SLASH +'s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
                 img = img2vector(filename, (height, weight))
                 train_face[i*k+j,:] = img
                 train_face_number[i*k+j] = people_num
             else:
-                filename = dataSetDir+'/s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
+                filename = dataSetDir+ constant.SLASH +'s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
                 img = img2vector(filename, (height, weight))
                 test_face[i*(10-k)+(j-k),:] = img
                 test_face_number[i*(10-k)+(j-k)] = people_num
