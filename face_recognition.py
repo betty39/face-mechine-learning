@@ -2,6 +2,7 @@
 
 import os
 import cv2
+import constant
 from datetime import datetime
 from PIL import Image,ImageDraw
 import time
@@ -29,7 +30,7 @@ def saveFaces(image_name, save_dir):
     if faces:
         #将人脸保存在save_dir目录下。
         #Image模块：Image.open获取图像句柄，crop剪切图像(剪切的区域就是detectFaces返回的坐标)，save保存。
-        file_name = image_name.split('/')[-1]
+        file_name = image_name.split(constant.SLASH)[-1]
         #os.mkdir(save_dir)
         count = 0
         for (x1,y1,x2,y2) in faces:
@@ -52,12 +53,12 @@ def drawFaces(image_name):
         img.save('drawfaces_'+image_name)
 
 if __name__ == '__main__':
-    needHandlePath = '/Users/qinlaodewenzi/Desktop/机器学习/att_faces'
-    handledPath = '/Users/qinlaodewenzi/Desktop/机器学习/att_faces'
+    needHandlePath = constant.JAFFE['first_path']
+    handledPath = constant.JAFFE['last_path']
     for parent,dirnames,filenames in os.walk(needHandlePath):
         index = 0
         for filename in filenames:
-            saveFaces(parent+'/'+filename, handledPath)
+            saveFaces(parent+constant.SLASH+filename, handledPath)
 
     '''
     result=detectFaces('KA.AN1.39.tiff')

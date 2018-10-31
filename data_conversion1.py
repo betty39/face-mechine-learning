@@ -2,8 +2,10 @@
 
 import os
 import operator
+import constant
 from numpy import *
 import cv2
+
 
 # define PCA
 '''
@@ -27,12 +29,13 @@ def pca(data,k):
     return data_new,data_mean,V1
 
 #covert image to vector
+#covert image to vector
 def img2vector(filename, dimsize = (50, 50)):
-    img = cv2.imread(filename,0) #read as 'gray'
+    #file_path_gbk = filename.encode('gbk')
+    img = cv2.imread(filename, 0)
     retImg = cv2.resize(img, dimsize) # 缩放成一定尺寸
     retImg=LBP(retImg)
     rows,cols = retImg.shape
-    retImg = cv2.equalizeHist(retImg) # 直方图均衡化
     imgVector = zeros((1,rows*cols)) #create a none vectore:to raise speed
     imgVector = reshape(retImg,(1,rows*cols)) #change img from 2D to 1D
     return imgVector
@@ -54,28 +57,31 @@ def LBP(I, radius=2, count=8):       #得到图像的LBP特征
 
 # load dataSet
 '''
-:param dataSetDir:读取文件夹下原始图片矩阵及标签(只解析子文件图片)
+:param dataSetDir:读取文件夹下原始图片矩阵及标签(适合两层的文件结构)
 :return train_face: 样本图片原始矩阵 train_face_lables: 样本图片标签
 '''
-def loadDataSet(dataSetDir, height = 256, weight = 256):
+def loadDataSet(dataSetDir, height = 100, weight = 100):
     ##step 1:Getting data set
     dimsize = height * weight
     fileNum = 0
-    for lists in os.listdir(dataSetDir):
-        sub_path = os.path.join(dataSetDir, lists)
-        if os.path.isfile(sub_path):
-            fileNum = fileNum+1                     # 统计图片数量
+    for parent,dirnames,filenames in os.walk(dataSetDir):
+        for dirname in dirnames:
+            for sub, sub_dir, sub_files in os.walk(parent + constant.SLASH + dirname):
+                for sub_file in sub_files:
+                    fileNum += 1
 
     train_face = zeros((fileNum, dimsize))
     train_face_labels = []
     for parent,dirnames,filenames in os.walk(dataSetDir):
-         index = 0
-         for filename in filenames:
-            img = img2vector(parent+'/'+filename, (height, weight))
-            train_face[index,:] = img
-            train_face_labels.append(parent+'/'+filename)
-            index += 1
-    return train_face,train_face_labels
+        index = 0
+        for dirname in dirnames:
+            for sub, sub_dir, sub_files in os.walk(parent + constant.SLASH + dirname):
+                for sub_file in sub_files:
+                    img = img2vector(parent+constant.SLASH+dirname + constant.SLASH + sub_file, (height, weight))
+                    train_face[index,:] = img
+                    train_face_labels.append(dirname)
+                    index += 1
+    return train_face, train_face_labels
 
 '''
 : param dataSetDir: 文件夹路径(att_faces 的数据) k: 取的训练集个数
@@ -95,12 +101,12 @@ def loadDataSetAnalysis(dataSetDir, k):
         people_num = i+1
         for j in range(10): #everyone has 10 different face
             if j < k:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(choose[j])+'.pgm'
+                filename = dataSetDir+ constant.SLASH +'s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
                 img = img2vector(filename, (height, weight))
                 train_face[i*k+j,:] = img
                 train_face_number[i*k+j] = people_num
             else:
-                filename = dataSetDir+'/s'+str(people_num)+'/'+str(choose[j])+'.pgm'
+                filename = dataSetDir+ constant.SLASH +'s'+str(people_num)+constant.SLASH+str(choose[j])+'.pgm'
                 img = img2vector(filename, (height, weight))
                 test_face[i*(10-k)+(j-k),:] = img
                 test_face_number[i*(10-k)+(j-k)] = people_num
@@ -127,7 +133,7 @@ def loadDataJaffeAnalysis(dataSetDir, k, height = 256, weight = 256):
         lastLabel = ''
         test_num = 0
         for filename in filenames:
-            img = img2vector(parent+'/'+filename, (height, weight))
+            img = img2vector(parent+constant.SLASH+filename, (height, weight))
             person = filename.split('.')
             if index == 0 or person[0] != lastLabel:
                 per = 0
@@ -142,3 +148,46 @@ def loadDataJaffeAnalysis(dataSetDir, k, height = 256, weight = 256):
             lastLabel = person[0]
             per += 1
     return train_face,train_face_labels,test_face,test_face_labels
+
+'''
+: param: dataSetDir: 数据文件夹路径, k: 每个类中划分作为训练集的个数, height: 图片统一高度, weight: 图片统一宽度
+'''
+def loadTwoLayerDataAnalysis(dataSetDir, k, height = 100, weight = 100):
+    dimsize = height * weight
+    personNum = 0
+    fileNum = 0
+    for parent,dirnames,filenames in os.walk(dataSetDir):
+        for dirname in dirnames:
+            personNum += 1
+            for sub, sub_dir, sub_files in os.walk(parent + constant.SLASH + dirname):
+                for sub_file in sub_files:
+                    fileNum += 1
+    train_face = zeros((k * personNum, height * weight))
+    train_face_labels = []
+    test_face = zeros((fileNum - k * personNum, height * weight))
+    test_face_labels = []
+    for parent,dirnames,filenames in os.walk(dataSetDir):
+        index = 0
+        test_num = 0
+        for dirname in dirnames:
+            each_file_num = 0
+            for sub, sub_dir, sub_files in os.walk(parent + constant.SLASH + dirname):
+                for file in sub_files:
+                    each_file_num += 1
+            choose = random.permutation(each_file_num)+1 #随机排序1-10 (0-9）+1
+            j = 0
+            for sub, sub_dir, sub_files in os.walk(parent + constant.SLASH + dirname):
+                for sub_file in sub_files:
+                    filename = sub_file.split('.')
+                    filename = parent+constant.SLASH+dirname + constant.SLASH + str(choose[j])+ '.' + filename[-1]
+                    img = img2vector(filename, (height, weight))
+                    if j < k:
+                        train_face[index*k+j,:] = img
+                        train_face_labels.append(dirname)
+                    else:
+                        test_face[test_num,:] = img
+                        test_face_labels.append(dirname)
+                        test_num += 1
+                    j += 1
+                index += 1
+    return train_face, train_face_labels, test_face, test_face_labels
