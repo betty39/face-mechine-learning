@@ -46,7 +46,7 @@ def img2vector(filename, dimsize = (50, 50)):
 def LBP(I, radius=2, count=8):       #得到图像的LBP特征
     dh = np.round([radius*math.sin(i*2*math.pi/count) for i in range(count)])
     dw = np.round([radius*math.cos(i*2*math.pi/count) for i in range(count)])
- 
+
     height ,width = I.shape
     lbp = np.zeros(I.shape, dtype = np.int)
     I1 = np.pad(I, radius, 'edge')
