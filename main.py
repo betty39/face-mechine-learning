@@ -1,5 +1,6 @@
 import data_conversion1
 import knn_kdtree1
+import svm
 from numpy import *
 import uuid
 from flask import Flask, abort, request, jsonify
@@ -24,7 +25,7 @@ def allowed_file(filename):
     return '.' in filename and \
             filename.rsplit('.', 1)[1] in ALLOW_EXTENSIONS
 
-@app.route('/')
+@app.route('')
 def hello_world():
     return 'Hello World!'
 
@@ -75,6 +76,45 @@ def knn_findFace():
 def knn_accucency():
 	precision, cost_time = knn_analysis.precisionWithBestKAndDim()
 	return buildResponse({'precision': precision, 'cost_time': cost_time})
+
+@app.route('/svm-accucency')
+def svm_accucency():
+	precision, cost_time = svm.pcaAndSvmFaceFindAnalysis()
+	return buildResponse({'precision': precision, 'cost_time': cost_time})
+
+@app.route('/snm-find-face', methods=['POST'])
+def svm_findFace():
+	'''
+	post 传输接受参数例子
+	if not request.json or 'id' not in request.json or 'info' not in request.json:
+        abort(400)
+    task = {
+        'id': request.json['id'],
+        'info': request.json['info']
+    }
+	'''
+	if not request.files or 'file' not in request.files:
+		return buildResponse({}, 400, 'no file upload')
+	file_path = ''
+	#获取post过来的文件名称，从name=file参数中获取
+	file = request.files['file']
+	if file and allowed_file(file.filename):
+		filename = file.filename
+		file_name = str(uuid.uuid4()) + '.' + filename.rsplit('.', 1)[1]
+		file.save(app.config['UPLOAD_FOLDER'] + constant.SLASH + file_name)
+		file_path = app.config['UPLOAD_FOLDER'] + constant.SLASH + file_name
+	if file_path == '':
+		return buildResponse({}, 400, 'no file upload')
+
+	# 对上传图片进行人脸检测
+	ifHasFace = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
+	if ifHasFace <= 0:
+		return buildResponse({}, 400, 'no face in upload file')
+	path = constant.JAFFE['last_path']
+	outputLabel, cost_time = svm.pcaAndSvmFaceFind(path, file_path)
+	return buildResponse({'face_name': outputLabel, 'cost_time': cost_time})
+
+
 
 def buildResponse(data, code = 0, message = 'success'):
 	return jsonify({'code': code, 'data': data,'message': message})
