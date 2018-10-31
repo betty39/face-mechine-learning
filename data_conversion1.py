@@ -30,11 +30,27 @@ def pca(data,k):
 def img2vector(filename, dimsize = (50, 50)):
     img = cv2.imread(filename,0) #read as 'gray'
     retImg = cv2.resize(img, dimsize) # 缩放成一定尺寸
+    retImg=LBP(retImg)
     rows,cols = retImg.shape
     retImg = cv2.equalizeHist(retImg) # 直方图均衡化
     imgVector = zeros((1,rows*cols)) #create a none vectore:to raise speed
     imgVector = reshape(retImg,(1,rows*cols)) #change img from 2D to 1D
     return imgVector
+
+#提取lbp
+# 算法主过程
+
+def LBP(I, radius=2, count=8):       #得到图像的LBP特征
+    dh = np.round([radius*math.sin(i*2*math.pi/count) for i in range(count)])
+    dw = np.round([radius*math.cos(i*2*math.pi/count) for i in range(count)])
+ 
+    height ,width = I.shape
+    lbp = np.zeros(I.shape, dtype = np.int)
+    I1 = np.pad(I, radius, 'edge')
+    for k in range(count):
+        h,w = radius+dh[k], radius+dw[k]
+        lbp += ((I>I1[h:h+height, w:w+width])<<k)
+    return lbp
 
 # load dataSet
 '''

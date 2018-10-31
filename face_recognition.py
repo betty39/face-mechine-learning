@@ -52,8 +52,8 @@ def drawFaces(image_name):
         img.save('drawfaces_'+image_name)
 
 if __name__ == '__main__':
-    needHandlePath = '/Users/heyijia/master/机器学习/人脸识别/jaffe'
-    handledPath = '/Users/heyijia/master/机器学习/人脸识别/jaffe_face'
+    needHandlePath = '/Users/qinlaodewenzi/Desktop/机器学习/att_faces'
+    handledPath = '/Users/qinlaodewenzi/Desktop/机器学习/att_faces'
     for parent,dirnames,filenames in os.walk(needHandlePath):
         index = 0
         for filename in filenames:

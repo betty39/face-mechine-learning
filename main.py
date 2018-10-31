@@ -63,7 +63,7 @@ def knn_findFace():
 	if len(ifHasFace) <= 0:
 		return buildResponse({}, 400, 'no face in upload file')
 
-	path = '/Users/heyijia/master/机器学习/人脸识别/jaffe'
+	path = '/Users/qinlaodewenzi/Desktop/机器学习/att_faces'
 	# 获取样本图片原始数据
 	train_data, train_labels = data_conversion1.loadDataSet(path)
 	data_train_new,data_mean,V = data_conversion1.pca(train_data, 30)
