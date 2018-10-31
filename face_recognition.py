@@ -37,6 +37,8 @@ def saveFaces(image_name, save_dir):
             file_name = os.path.join(save_dir,file_name)
             Image.open(image_name).crop((x1,y1,x2,y2)).save(file_name)
             count+=1
+        return 1
+    return 0
 
 
 #在原图像上画矩形，框出所有人脸。

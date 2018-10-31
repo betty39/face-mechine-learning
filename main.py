@@ -1,13 +1,14 @@
 import data_conversion1
 import knn_kdtree1
-import os
-import operator
 from numpy import *
 import uuid
-import platform
 from flask import Flask, abort, request, jsonify
 import face_recognition
 import constant
+import knn_analysis
+from time import time
+import os
+import data_preprocess
 
 UPLOAD_FOLDER = 'upload'
 ALLOW_EXTENSIONS = set(['jpg', 'png', 'pgm', 'tiff'])
@@ -46,30 +47,34 @@ def knn_findFace():
 	if file and allowed_file(file.filename):
 		filename = file.filename
 		file_name = str(uuid.uuid4()) + '.' + filename.rsplit('.', 1)[1]
-		#file.save(os.path.join(app.config['UPLOAD_FOLDER']), file_name)
 		file.save(app.config['UPLOAD_FOLDER'] + constant.SLASH + file_name)
-		file_path = UPLOAD_FOLDER + constant.SLASH + file_name
-		print(file_path)
+		file_path = app.config['UPLOAD_FOLDER'] + constant.SLASH + file_name
 	if file_path == '':
 		return buildResponse({}, 400, 'no file upload')
 
 	# 对上传图片进行人脸检测
-	ifHasFace = face_recognition.detectFaces(file_path)
-	if len(ifHasFace) <= 0:
+	ifHasFace = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
+	if ifHasFace <= 0:
 		return buildResponse({}, 400, 'no face in upload file')
+	start_time = time()
 
 	path = constant.JAFFE['last_path']
 	# 获取样本图片原始数据
 	train_data, train_labels = data_conversion1.loadDataSet(path)
-	data_train_new,data_mean,V = data_conversion1.pca(train_data, 30)
-	test_path = file_path
+	data_train_new,data_mean,V = data_conversion1.pca(train_data, knn_analysis.BEST_DIM)
+	test_path = data_preprocess.doPreprocess(file_path, constant.JAFFE['last_height'], constant.JAFFE['last_weight']) # 图片预处理
 	test_face = data_conversion1.img2vector(test_path, (constant.JAFFE['last_height'], constant.JAFFE['last_weight']))
 	num_test = test_face.shape[0]
 	temp_face = test_face - tile(data_mean,(num_test,1))
 	data_test_new = temp_face*V # 得到测试脸在特征向量下的数据
 	data_test_new = array(data_test_new)
-	outputLabel = knn_kdtree1.findSimilarLable(data_train_new, train_labels, data_test_new[0,:], 6)
-	return buildResponse({'face_name': outputLabel})
+	outputLabel = knn_kdtree1.findSimilarLable(data_train_new, train_labels, data_test_new[0,:], knn_analysis.BEST_K)
+	return buildResponse({'face_name': outputLabel, 'cost_time': time() - start_time})
+
+@app.route('/knn-accucency')
+def knn_accucency():
+	precision, cost_time = knn_analysis.precisionWithBestKAndDim()
+	return buildResponse({'precision': precision, 'cost_time': cost_time})
 
 def buildResponse(data, code = 0, message = 'success'):
 	return jsonify({'code': code, 'data': data,'message': message})
