@@ -4,6 +4,7 @@ import os
 import operator
 import constant
 from numpy import *
+import numpy as np
 import cv2
 
 
@@ -41,7 +42,6 @@ def img2vector(filename, dimsize = (50, 50)):
 
 #提取lbp
 # 算法主过程
-
 def LBP(I, radius=2, count=8):       #得到图像的LBP特征
     dh = np.round([radius*math.sin(i*2*math.pi/count) for i in range(count)])
     dw = np.round([radius*math.cos(i*2*math.pi/count) for i in range(count)])
