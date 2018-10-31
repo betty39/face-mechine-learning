@@ -11,7 +11,7 @@ from time import time
 import os
 import data_preprocess
 
-UPLOAD_FOLDER = 'upload'
+UPLOAD_FOLDER = constant.UPLOAD_PATH
 ALLOW_EXTENSIONS = set(['jpg', 'png', 'pgm', 'tiff'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -25,7 +25,7 @@ def allowed_file(filename):
     return '.' in filename and \
             filename.rsplit('.', 1)[1] in ALLOW_EXTENSIONS
 
-@app.route('')
+@app.route('/')
 def hello_world():
     return 'Hello World!'
 
@@ -54,8 +54,8 @@ def knn_findFace():
 		return buildResponse({}, 400, 'no file upload')
 
 	# 对上传图片进行人脸检测
-	ifHasFace = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
-	if ifHasFace <= 0:
+	draw_face = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
+	if draw_face == '':
 		return buildResponse({}, 400, 'no face in upload file')
 	start_time = time()
 
@@ -70,7 +70,7 @@ def knn_findFace():
 	data_test_new = temp_face*V # 得到测试脸在特征向量下的数据
 	data_test_new = array(data_test_new)
 	outputLabel = knn_kdtree1.findSimilarLable(data_train_new, train_labels, data_test_new[0,:], knn_analysis.BEST_K)
-	return buildResponse({'face_name': outputLabel, 'cost_time': time() - start_time})
+	return buildResponse({'draw_face_path': draw_face, 'face_name': outputLabel, 'cost_time': time() - start_time})
 
 @app.route('/knn-accucency')
 def knn_accucency():
@@ -82,17 +82,8 @@ def svm_accucency():
 	precision, cost_time = svm.pcaAndSvmFaceFindAnalysis()
 	return buildResponse({'precision': precision, 'cost_time': cost_time})
 
-@app.route('/snm-find-face', methods=['POST'])
+@app.route('/svm-find-face', methods=['POST'])
 def svm_findFace():
-	'''
-	post 传输接受参数例子
-	if not request.json or 'id' not in request.json or 'info' not in request.json:
-        abort(400)
-    task = {
-        'id': request.json['id'],
-        'info': request.json['info']
-    }
-	'''
 	if not request.files or 'file' not in request.files:
 		return buildResponse({}, 400, 'no file upload')
 	file_path = ''
@@ -107,12 +98,12 @@ def svm_findFace():
 		return buildResponse({}, 400, 'no file upload')
 
 	# 对上传图片进行人脸检测
-	ifHasFace = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
-	if ifHasFace <= 0:
+	draw_face = face_recognition.saveFaces(file_path, app.config['UPLOAD_FOLDER'])
+	if draw_face == '':
 		return buildResponse({}, 400, 'no face in upload file')
 	path = constant.JAFFE['last_path']
 	outputLabel, cost_time = svm.pcaAndSvmFaceFind(path, file_path)
-	return buildResponse({'face_name': outputLabel, 'cost_time': cost_time})
+	return buildResponse({'draw_face_path': draw_face ,'face_name': outputLabel, 'cost_time': cost_time})
 
 
 

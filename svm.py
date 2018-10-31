@@ -14,8 +14,8 @@ from time import *
 
 def pcaAndSvmFaceFindAnalysis():
     start_time = time()
-    path = constant.ATT_FACE['path']
-    xTrain_, yTrain, xTest_, yTest = data_conversion1.loadDataSetAnalysis(path, 8)
+    path = constant.JAFFE['last_path']
+    xTrain_, yTrain, xTest_, yTest = data_conversion1.loadTwoLayerDataAnalysis(path, 8)
     num_train, num_test = xTrain_.shape[0], xTest_.shape[0]
     xTrain, data_mean, V = data_conversion1.pca(xTrain_, 16)
     xTest = np.array((xTest_ - np.tile(data_mean, (num_test, 1))) * V)  # 得到测试脸在特征向量下的数据
@@ -36,11 +36,10 @@ def pcaAndSvmFaceFindAnalysis():
 
 def pcaAndSvmFaceFind(path, file_path):
     star_time = time()
-    train_data, train_labels = data_conversion1.loadDataSet(path, constant.ATT_FACE['height'], constant.ATT_FACE['weight'])
+    train_data, train_labels = data_conversion1.loadDataSet(path)
     train_data_new,data_mean,V = data_conversion1.pca(train_data,16)
-    test_path = data_preprocess.doPreprocess(file_path, constant.ATT_FACE['height'],
-                                             constant.ATT_FACE['weight'])  # 图片预处理
-    test_face = data_conversion1.img2vector(test_path, (constant.ATT_FACE['height'], constant.ATT_FACE['weight']))
+    test_path = data_preprocess.doPreprocess(file_path)  # 图片预处理
+    test_face = data_conversion1.img2vector(test_path, (constant.JAFFE['last_height'], constant.JAFFE['last_weight']))
     num_test = test_face.shape[0]
 
     temp_face = test_face - np.tile(data_mean, (num_test, 1))
@@ -51,7 +50,7 @@ def pcaAndSvmFaceFind(path, file_path):
                        param_grid)
     clf = clf.fit(train_data_new, train_labels)
     test_pred = clf.predict(data_test_new)
-    return test_pred[0], star_time-time()
+    return test_pred[0], time() - star_time
 
 def main():
     acc = pcaAndSvmFaceFindAnalysis()

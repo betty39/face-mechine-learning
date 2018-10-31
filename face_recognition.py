@@ -24,8 +24,9 @@ def detectFaces(image_name):
     return result
 
 
-#保存人脸图
+#保存人脸图 且框出人脸图进行保存
 def saveFaces(image_name, save_dir):
+    draw_path = ''
     faces = detectFaces(image_name)
     if faces:
         #将人脸保存在save_dir目录下。
@@ -33,12 +34,17 @@ def saveFaces(image_name, save_dir):
         file_name = image_name.split(constant.SLASH)[-1]
         #os.mkdir(save_dir)
         count = 0
+        img = Image.open(image_name)
+        draw_instance = ImageDraw.Draw(img)
         for (x1,y1,x2,y2) in faces:
-            file_name = os.path.join(save_dir,file_name)
-            Image.open(image_name).crop((x1,y1,x2,y2)).save(file_name)
+            file_name1 = os.path.join(save_dir,file_name)
+            Image.open(image_name).crop((x1,y1,x2,y2)).save(file_name1)
+            draw_instance.rectangle((x1,y1,x2,y2), outline=255)
             count+=1
-        return 1
-    return 0
+        draw_path = save_dir + constant.SLASH +  'draw-' + file_name
+        img.save(draw_path)
+        return draw_path
+    return draw_path
 
 
 #在原图像上画矩形，框出所有人脸。
@@ -51,7 +57,7 @@ def drawFaces(image_name):
         img = Image.open(image_name)
         draw_instance = ImageDraw.Draw(img)
         for (x1,y1,x2,y2) in faces:
-            draw_instance.rectangle((x1,y1,x2,y2), outline=(255, 0,0))
+            draw_instance.rectangle((x1,y1,x2,y2), outline= 255)
         img.save('drawfaces_'+image_name)
 
 if __name__ == '__main__':
@@ -61,7 +67,7 @@ if __name__ == '__main__':
         index = 0
         for filename in filenames:
             saveFaces(parent+constant.SLASH+filename, handledPath)
-
+    # saveFaces('/Users/heyijia/master/机器学习/人脸识别/jaffe/KA.SU3.38.tiff', 'upload')
     '''
     result=detectFaces('KA.AN1.39.tiff')
     if len(result)>0:
