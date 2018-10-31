@@ -70,17 +70,17 @@ def knn_findFace():
 	data_test_new = temp_face*V # 得到测试脸在特征向量下的数据
 	data_test_new = array(data_test_new)
 	outputLabel = knn_kdtree1.findSimilarLable(data_train_new, train_labels, data_test_new[0,:], knn_analysis.BEST_K)
-	return buildResponse({'draw_face_path': draw_face, 'face_name': outputLabel, 'cost_time': time() - start_time})
+	return buildResponse({'draw_face_path': draw_face, 'face_name': outputLabel, 'cost_time': round(time() - start_time, 2)})
 
 @app.route('/knn-accucency')
 def knn_accucency():
 	precision, cost_time = knn_analysis.precisionWithBestKAndDim()
-	return buildResponse({'precision': precision, 'cost_time': cost_time})
+	return buildResponse({'precision': round(precision, 3), 'cost_time': round(cost_time, 2)})
 
 @app.route('/svm-accucency')
 def svm_accucency():
 	precision, cost_time = svm.pcaAndSvmFaceFindAnalysis()
-	return buildResponse({'precision': precision, 'cost_time': cost_time})
+	return buildResponse({'precision': round(precision, 3), 'cost_time': round(cost_time, 2)})
 
 @app.route('/svm-find-face', methods=['POST'])
 def svm_findFace():
@@ -103,7 +103,7 @@ def svm_findFace():
 		return buildResponse({}, 400, 'no face in upload file')
 	path = constant.JAFFE['last_path']
 	outputLabel, cost_time = svm.pcaAndSvmFaceFind(path, file_path)
-	return buildResponse({'draw_face_path': draw_face ,'face_name': outputLabel, 'cost_time': cost_time})
+	return buildResponse({'draw_face_path': draw_face ,'face_name': outputLabel, 'cost_time': round(cost_time, 2)})
 
 
 
