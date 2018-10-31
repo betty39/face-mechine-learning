@@ -59,6 +59,14 @@ def clearNoise(img_file,G,N,Z, save_img):
     #保存图片
     image.save(save_img)
 
+def doPreprocess(img_path, height, weight):
+    gray_img = cv2.imread(img_path, 0) # 灰度图
+    retImg = cv2.resize(gray_img, (height, weight)) # 缩放成一定尺寸
+    retImg = cv2.equalizeHist(retImg) # 直方图均衡化
+    cv2.imwrite(img_path, retImg)
+    clearNoise(img_path, 20, 2, 4, img_path)
+    return img_path
+
 if __name__ == '__main__':
     path = constant.JAFFE['first_path']
     handle = constant.JAFFE['last_path']

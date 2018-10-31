@@ -29,7 +29,6 @@ def pca(data,k):
     return data_new,data_mean,V1
 
 #covert image to vector
-#covert image to vector
 def img2vector(filename, dimsize = (50, 50)):
     #file_path_gbk = filename.encode('gbk')
     img = cv2.imread(filename, 0)

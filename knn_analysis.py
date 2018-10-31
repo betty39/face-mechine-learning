@@ -1,10 +1,12 @@
 import data_conversion1
 import knn_kdtree1
-import os
-import operator
 from numpy import *
-import pylab as pl
+import matplotlib.pyplot as pl
 import constant
+from time import *
+
+BEST_K = 4
+BEST_DIM = 20
 
 def pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, lowDimen, knn):
     data_train_new,data_mean,V = data_conversion1.pca(train_data, lowDimen)
@@ -23,50 +25,30 @@ def pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, low
     accuracy = float(true_num)/num_test
     return accuracy
 
-path = constant.ATT_FACE['path']
-# 获取样本图片原始数据
-print('analysis att_faces')
+def precisionWithBestKAndDim():
+    path = constant.JAFFE['last_path']
+    # 获取样本图片原始数据
+    start_time =time()
+    train_data, train_labels, test_data, test_labels = data_conversion1.loadTwoLayerDataAnalysis(path, 14, constant.JAFFE['last_height'], constant.JAFFE['last_weight'])
+    precision = pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, BEST_DIM, BEST_K)
+    return precision, time() - start_time
 
-train_data, train_labels, test_data, test_labels = data_conversion1.loadDataSetAnalysis(path, 8)
-# 画图
-x = []  # 横轴的数据
-y = []
-dim = 10
-while (dim < 100):
-    y.append(pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, dim, 4))
-    x.append(dim)
-    dim += 10
-pl.plot(x, y)  # 调用pylab的plot函数绘制曲线
-pl.show()  # 显示绘制出的图
-
-
-path = constant.JAFFE['first_path']
-# 获取样本图片原始数据
-print('analysis jaffe')
-train_data, train_labels, test_data, test_labels = data_conversion1.loadDataJaffeAnalysis(path, 13)
-
-# 画图
-x = []  # 横轴的数据
-y = []
-dim = 10
-while (dim < 100):
-	y.append(pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, dim, 4))
-	x.append(dim)
-	dim += 10
-pl.plot(x, y)  # 调用pylab的plot函数绘制曲线
-pl.show()  # 显示绘制出的图
-
-path = constant.JAFFE['last_path']
-# 获取样本图片原始数据
-print('analysis jaffe face')
-train_data, train_labels, test_data, test_labels = data_conversion1.loadTwoLayerDataAnalysis(path, 13, constant.JAFFE['last_height'], constant.JAFFE['last_weight'])
-# 画图
-x = []  # 横轴的数据
-y = []
-dim = 10
-while (dim < 100):
-    y.append(pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, dim, 4))
-    x.append(dim)
-    dim += 10
-pl.plot(x, y)  # 调用pylab的plot函数绘制曲线
-pl.show()  # 显示绘制出的图
+def analysis():
+    path = constant.JAFFE['last_path']
+    # 获取样本图片原始数据
+    print('analysis jaffe face')
+    train_data, train_labels, test_data, test_labels = data_conversion1.loadTwoLayerDataAnalysis(path, 14, constant.JAFFE['last_height'], constant.JAFFE['last_weight'])
+    # 画图
+    for k in range(10):
+        # x = []  # 横轴的数据
+        x = linspace(5, 100, 19)
+        y = []
+        for i in x:
+            dim = int(i)
+            y.append(pcaAndFaceFindAnalysis(train_data, train_labels, test_data, test_labels, dim, k + 1))
+        pl.plot(x, y, label = k + 1)  # 调用pylab的plot函数绘制曲线
+    pl.xlabel("Dimension")
+    pl.ylabel("Precision")
+    pl.title('Different k')
+    pl.legend()
+    pl.show()  # 显示绘制出的图
