@@ -16,4 +16,5 @@ pip install matplotlib
 pip install flask
 python main.py 运行之后为接口项目启动, 可在postman中根据路由访问接口
 python knn_analysis.py 为knn算法分析文件, 目前可生成一张根据降低维度不同准确率不同的图片
+cp constant_sample.py constant.py
 ```
